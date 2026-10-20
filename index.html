@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Generador de Contraseñas</title>
+<style>
+  :root {
+    --bg: #0f1420;
+    --panel: #1a2130;
+    --panel-2: #232c40;
+    --text: #e8ecf4;
+    --muted: #9aa5bc;
+    --accent: #4f8cff;
+    --accent-hover: #6ba1ff;
+    --weak: #ef5f6c;
+    --medium: #f0b429;
+    --strong: #3ecf8e;
+    --border: #2d3853;
+    --radius: 10px;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px 16px;
+    background: radial-gradient(1200px 600px at 20% -10%, #1b2a4a 0%, transparent 60%), var(--bg);
+    color: var(--text);
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  .card {
+    width: 100%;
+    max-width: 480px;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 28px 24px;
+    box-shadow: 0 10px 40px rgba(0,0,0,.45);
+  }
+
+  h1 {
+    margin: 0 0 4px;
+    font-size: 1.35rem;
+    text-align: center;
+  }
+
+  .subtitle {
+    margin: 0 0 22px;
+    text-align: center;
+    color: var(--muted);
+    font-size: .9rem;
+  }
+
+  label.block {
+    display: block;
+    font-size: .9rem;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+
+  /* Slider */
+  .slider-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 20px;
+  }
+
+  input[type="range"] {
+    flex: 1;
+    min-width: 0;
+    accent-color: var(--accent);
+    height: 28px;
+    cursor: pointer;
+  }
+
+  .len-value {
+    min-width: 44px;
+    text-align: center;
+    font-variant-numeric: tabular-nums;
+    font-weight: 700;
+    font-size: 1.05rem;
+    color: var(--accent);
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 6px 4px;
+  }
+
+  /* Checkboxes */
+  .options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 18px;
+    margin-bottom: 20px;
+  }
+
+  .options label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: .95rem;
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .options input[type="checkbox"] {
+    width: 17px;
+    height: 17px;
+    accent-color: var(--accent);
+    cursor: pointer;
+  }
+
+  /* Resultado */
+  .result-wrap {
+    position: relative;
+    margin-bottom: 14px;
+  }
+
+  #resultado {
+    width: 100%;
+    padding: 14px 110px 14px 14px;
+    font-family: ui-monospace, "Cascadia Mono", "Consolas", monospace;
+    font-size: 1rem;
+    color: var(--text);
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    outline: none;
+    word-break: break-all;
+  }
+
+  #resultado:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(79,140,255,.25);
+  }
+
+  #copiar {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    bottom: 6px;
+    padding: 0 14px;
+    border: 1px solid var(--accent);
+    border-radius: 8px;
+    background: transparent;
+    color: var(--accent);
+    font-size: .88rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background .15s, color .15s;
+  }
+
+  #copiar:hover { background: rgba(79,140,255,.15); }
+
+  #copiar.ok {
+    background: var(--strong);
+    border-color: var(--strong);
+    color: #08240f;
+  }
+
+  #copiar.error {
+    background: var(--weak);
+    border-color: var(--weak);
+    color: #2b0409;
+    white-space: normal;
+    font-size: .72rem;
+    line-height: 1.15;
+    padding: 4px 8px;
+  }
+
+  /* Fortaleza */
+  .fortaleza {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 22px;
+  }
+
+  .bars {
+    display: flex;
+    flex: 1;
+    gap: 6px;
+  }
+
+  .bar {
+    flex: 1;
+    height: 7px;
+    border-radius: 4px;
+    background: var(--border);
+    transition: background .25s;
+  }
+
+  .bar.on.débil, .bar.on.debil { background: var(--weak); }
+  .bar.on.media { background: var(--medium); }
+  .bar.on.fuerte { background: var(--strong); }
+
+  .fortaleza-texto {
+    font-size: .9rem;
+    font-weight: 700;
+    min-width: 60px;
+    text-align: right;
+  }
+
+  .fortaleza-texto.débil, .fortaleza-texto.debil { color: var(--weak); }
+  .fortaleza-texto.media { color: var(--medium); }
+  .fortaleza-texto.fuerte { color: var(--strong); }
+
+  /* Botones */
+  .acciones {
+    display: flex;
+    gap: 12px;
+  }
+
+  .btn {
+    flex: 1;
+    padding: 13px 16px;
+    border-radius: var(--radius);
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: background .15s, transform .05s;
+  }
+
+  .btn:active { transform: translateY(1px); }
+
+  .btn-primary {
+    background: var(--accent);
+    color: #fff;
+  }
+
+  .btn-primary:hover { background: var(--accent-hover); }
+
+  .btn-secondary {
+    background: var(--panel-2);
+    color: var(--text);
+    border-color: var(--border);
+  }
+
+  .btn-secondary:hover { background: #2a344c; }
+
+  /* Foco accesible */
+  input[type="range"]:focus-visible,
+  input[type="checkbox"]:focus-visible,
+  button:focus-visible {
+    outline: 3px solid var(--accent);
+    outline-offset: 2px;
+  }
+
+  @media (max-width: 420px) {
+    .card { padding: 22px 16px; }
+    #resultado { font-size: .92rem; padding-right: 100px; }
+    .acciones { flex-direction: column; }
+  }
+</style>
+</head>
+<body>
+<main class="card">
+  <h1>Generador de Contraseñas</h1>
+  <p class="subtitle">Crea contraseñas seguras y aleatorias</p>
+
+  <label class="block" for="longitud">Longitud: <span id="longitudLabel">16</span></label>
+  <div class="slider-row">
+    <input type="range" id="longitud" min="8" max="32" value="16" step="1"
+           aria-label="Longitud de la contraseña">
+    <span class="len-value" id="lenValue" aria-hidden="true">16</span>
+  </div>
+
+  <div class="options">
+    <label><input type="checkbox" id="mayusculas" checked> Mayúsculas</label>
+    <label><input type="checkbox" id="numeros" checked> Números</label>
+    <label><input type="checkbox" id="simbolos"> Símbolos</label>
+  </div>
+
+  <div class="result-wrap">
+    <input type="text" id="resultado" readonly value="" aria-label="Contraseña generada">
+    <button type="button" id="copiar">Copiar</button>
+  </div>
+
+  <div class="fortaleza" aria-live="polite">
+    <div class="bars">
+      <span class="bar" id="bar1"></span>
+      <span class="bar" id="bar2"></span>
+      <span class="bar" id="bar3"></span>
+    </div>
+    <span class="fortaleza-texto" id="fortalezaTexto">—</span>
+  </div>
+
+  <div class="acciones">
+    <button type="button" class="btn btn-primary" id="generar">Generar</button>
+    <button type="button" class="btn btn-secondary" id="copiar2">Copiar</button>
+  </div>
+</main>
+
+<script>
+(function () {
+  "use strict";
+
+  var LOWER = "abcdefghijklmnopqrstuvwxyz";
+  var UPPER = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  var DIGITS = "0123456789";
+  var SYMBOLS = "!@#$%&*+-=?_./:;,^~"; // sin < ni > ; @ una sola vez
+
+  var $ = function (id) { return document.getElementById(id); };
+
+  var slider = $("longitud");
+  var lenValue = $("lenValue");
+  var longitudLabel = $("longitudLabel");
+  var cbMay = $("mayusculas");
+  var cbNum = $("numeros");
+  var cbSym = $("simbolos");
+  var resultado = $("resultado");
+  var fortalezaTexto = $("fortalezaTexto");
+  var bars = [$("bar1"), $("bar2"), $("bar3")];
+  var btnGenerar = $("generar");
+  var btnCopiar = $("copiar");
+  var btnCopiar2 = $("copiar2");
+
+  var lastPassword = "";
+  var copyTimer = null;   // timer de btnCopiar
+  var copyTimer2 = null;  // timer de btnCopiar2
+
+  function randomInt(max) {
+    // crypto.getRandomValues con rechazo de sesgo
+    var limit = Math.floor(0xFFFFFFFF / max) * max;
+    var arr = new Uint32Array(1);
+    var v;
+    do {
+      crypto.getRandomValues(arr);
+      v = arr[0];
+    } while (v >= limit);
+    return v % max;
+  }
+
+  function pick(str) {
+    return str.charAt(randomInt(str.length));
+  }
+
+  function activeSets() {
+    var sets = [LOWER]; // minúsculas siempre
+    if (cbMay.checked) sets.push(UPPER);
+    if (cbNum.checked) sets.push(DIGITS);
+    if (cbSym.checked) sets.push(SYMBOLS);
+    return sets;
+  }
+
+  function allChars(sets) {
+    return sets.join("");
+  }
+
+  function generate() {
+    var sets = activeSets(); // fallback: si todo desactivado, solo LOWER
+    var len = parseInt(slider.value, 10);
+    var pool = allChars(sets);
+
+    // Al menos un carácter de cada tipo activo
+    var chars = [];
+    var i;
+    for (i = 0; i < sets.length; i++) {
+      chars.push(pick(sets[i]));
+    }
+
+    for (i = chars.length; i < len; i++) {
+      chars.push(pick(pool));
+    }
+
+    // Fisher–Yates con crypto
+    for (i = chars.length - 1; i > 0; i--) {
+      var j = randomInt(i + 1);
+      var tmp = chars[i];
+      chars[i] = chars[j];
+      chars[j] = tmp;
+    }
+
+    var pass = chars.join("");
+
+    // Requisito 7: cada Generar produce una contraseña distinta de la anterior
+    if (lastPassword !== "" && pass === lastPassword) {
+      generate();
+      return;
+    }
+
+    lastPassword = pass;
+    resultado.value = pass; // input.value, nunca innerHTML
+  }
+
+  function strengthScore(len, tipos) {
+    // Regla determinística (criterio 10):
+    // tipos = 1 (minúsculas, siempre) + checkboxes marcados
+    // (8,1)->Débil  (12,2)->Media  (16,3)->Fuerte
+    if (len >= 16 && tipos >= 3) return 3; // Fuerte
+    if (len >= 12 && tipos >= 2) return 2; // Media
+    return 1;                              // Débil
+  }
+
+  function updateStrength() {
+    var sets = activeSets();      // [LOWER] + checkboxes marcados
+    var tipos = sets.length;      // 1 + checkboxes marcados
+    var len = parseInt(slider.value, 10);
+    var level = strengthScore(len, tipos);
+    var names = ["", "Débil", "Media", "Fuerte"];
+    var cls = ["", "debil", "media", "fuerte"];
+
+    for (var i = 0; i < 3; i++) {
+      bars[i].className = "bar" + (i < level ? " on " + cls[level] : "");
+    }
+    fortalezaTexto.className = "fortaleza-texto " + cls[level];
+    fortalezaTexto.textContent = names[level];
+  }
+
+  function updateSliderLabel() {
+    var v = slider.value;
+    lenValue.textContent = v;
+    longitudLabel.textContent = v;
+  }
+
+  function showCopyState(btn, text, cls, ms) {
+    btn.textContent = text;
+    btn.classList.remove("ok", "error");
+    if (cls) btn.classList.add(cls);
+    if (copyTimer) clearTimeout(copyTimer);
+    copyTimer = setTimeout(function () {
+      btn.textContent = "Copiar";
+      btn.classList.remove("ok", "error");
+    }, ms);
+  }
+
+  function fallbackCopy(text) {
+    var ta = document.createElement("textarea");
+    ta.value = text;
+    ta.setAttribute("readonly", "");
+    ta.style.position = "fixed";
+    ta.style.top = "-9999px";
+    ta.style.left = "-9999px";
+    document.body.appendChild(ta);
+    ta.select();
+    ta.setSelectionRange(0, text.length);
+    var ok = false;
+    try {
+      ok = document.execCommand("copy");
+    } catch (e) {
+      ok = false;
+    }
+    document.body.removeChild(ta);
+    return ok;
+  }
+
+  function copyFeedback(ok) {
+    if (ok) {
+      // showCopyState programa y trackea su propio timer (copyTimer).
+      // NO se limpia copyTimer acá: eso cancelaba el timer recién creado
+      // y el botón quedaba pegado en "¡Copiada!".
+      showCopyState(btnCopiar, "¡Copiada!", "ok", 1500);
+
+      if (copyTimer2) clearTimeout(copyTimer2);
+      btnCopiar2.textContent = "¡Copiada!";
+      copyTimer2 = setTimeout(function () {
+        btnCopiar2.textContent = "Copiar";
+        copyTimer2 = null;
+      }, 1500);
+    } else {
+      showCopyState(btnCopiar, "No se pudo copiar — seleccioná y copiá manual", "error", 3000);
+    }
+  }
+
+  function copyPassword() {
+    var text = resultado.value;
+    if (!text) return;
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(function () {
+        copyFeedback(true);
+      }).catch(function () {
+        copyFeedback(fallbackCopy(text));
+      });
+    } else {
+      copyFeedback(fallbackCopy(text));
+    }
+  }
+
+  // Eventos
+  slider.addEventListener("input", function () {
+    updateSliderLabel();
+    updateStrength(); // fortaleza en tiempo real, sin pulsar Generar
+  });
+
+  [cbMay, cbNum, cbSym].forEach(function (cb) {
+    cb.addEventListener("change", updateStrength);
+  });
+
+  btnGenerar.addEventListener("click", generate);
+  btnCopiar.addEventListener("click", copyPassword);
+  btnCopiar2.addEventListener("click", copyPassword);
+
+  // Init: longitud por defecto 16, contraseña automática al cargar
+  updateSliderLabel();
+  updateStrength();
+  generate();
+})();
+</script>
+</body>
+</html>
