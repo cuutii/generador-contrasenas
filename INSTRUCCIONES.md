@@ -19,6 +19,16 @@ No necesita internet ni instalación.
 
 ## Cómo COMPARTIRLA — opciones
 
+### Opción 0 — Link público permanente (YA PUBLICADO ✅)
+La app ya está online en GitHub Pages. Solo pasá este link:
+**https://cuutii.github.io/generador-contrasenas/**
+- Se abre desde cualquier lado (celu, compu), online.
+- Es permanente y gratis.
+- Repo: https://github.com/cuutii/generador-contrasenas
+
+Para **actualizarla** después (cambios en el `index.html`): ver "Cómo actualizar"
+al final de este archivo.
+
 ### Opción A — Enviar el archivo (la más fácil)
 1. Mandá el archivo `index.html` por WhatsApp, correo o USB.
 2. Quien lo recibe hace doble clic y se abre en su navegador.
@@ -49,6 +59,16 @@ Alternativa con GitHub Pages si ya tenés cuenta de GitHub.
 - Se creó con el proceso multi-agente de OpenCode
   (planner → implementer → reviewer). Verificado: APROBADO.
 
+## Cómo ACTUALIZAR la web (si cambiás algo)
+Si modificás el `index.html`, para que el link público se refleje:
+1. Editá el archivo en `MIS-PROYECTOS\01-generador-contrasenas\index.html`.
+2. Decime "actualizá la web" y yo hago el resto, o hacelo a mano:
+   - `git add index.html`
+   - `git commit -m "cambio"`
+   - `git push`
+3. GitHub Pages lo reconstruye solo en ~1 minuto.
+
 ## Origen
 - Creado: 2026-10-20 como prueba del proceso multi-agente.
+- Publicado: 2026-10-20 en GitHub Pages (https://cuutii.github.io/generador-contrasenas/).
 - Registro completo en `ANOTADOR.md` del proyecto de OpenCode.
